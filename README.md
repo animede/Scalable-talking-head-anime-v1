@@ -13,6 +13,33 @@ APIサーバ機能
 などの機能を追加し、サーバまたはクラスライブラリとして利用できるようにしました。
 また、クライアント側では並列列処理機能を利用して処理時間を要するポースデータの生成とアップスケールをpipeline処理しています。更に自動瞬き機能やポーズゲネレーション機能も並列処理されてアプリからの操作を最小限にすることができます。
 
+## リンク/クレジット
+
+#### talking-head-anime-3-demo 
+
+https://github.com/pkhungurn/talking-head-anime-3-demo
+
+MIT License
+
+#### anime-segmentation  背景削除
+
+https://github.com/SkyTNT/anime-segmentation
+
+Apache License  Version 2.0,
+
+#### Real-ESRGAN  アップスケーラ
+
+https://github.com/xinntao/Real-ESRGAN
+
+BSD 3-Clause License
+
+#### Anime-Face-Detection
+
+https://github.com/animede/anime_face_detection
+
+MIT License
+
+
 ## Scalable-Tanking-Head-Anime-3-API との違い
 
 Scalable-Tanking-Head-Anime-3-APIはアップスケーラやAnimeFaceDetection,背景削除を独立したサーバで動かしています。とても面倒でした。またテストはテストプログラムで動きを確認するだけでした。Scalable TalkingHead-Anime-V1で独立して動いていた各AIサーバをメインサーバ機能のsubprocessとして実行・停止を行いため、サーバ起動は一つのPythonファイルの実行でずべて動くように大きく改良してイます。またテスト用のGUIも準備しました。Scalable-Tanking-Head-Anime-3-API で使えたテストプログラムはすべて動きます。またクラスライブラリに変更は無いので過去のバージョンと互換です。GUIコードではクラスライブラリの使い方がわかるように簡略化を避けました。
