@@ -1,0 +1,23 @@
+conda activate pt12_fd
+cd /home/yu/face_detecton
+
+ローカルで動かす
+python face_d_server.py 
+python face_d_server.py --test1
+python face_d_server.py --test2
+
+システム内で動かす
+python face_d_server.py --host 192.168.5.50:50000
+
+クライアント側
+
+テスト
+openvcが必要
+python face_d_tcp.py --test 2   実行している環境下のimageフォルダ内のtest1.jpgを検出
+python face_d_tcp.py --test 2 --filename xxx.jpg 実行している環境下のxxx.jpgを検出
+
+python face_d_tcp.py --test 3   face_det_sq(img_data,confidence_level)  正方形
+
+python face_d_tcp.py --test 4 --level 0.4 --filename ./image/test4.jpg　頭全体
+
+

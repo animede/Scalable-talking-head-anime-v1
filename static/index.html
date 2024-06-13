@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Processing App</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+
+<body>
+    <h1>Scalable Talking-Head-Anime Application</h1>
+
+    <div class="image-container">
+        <div>
+            <h4>アップロードイメージ</h4>
+            <img id="originalImage" src="" alt="アップロードイメージ">
+        </div>
+        <div>
+            <h4>テンプレート/生成イメージ</h4>
+            <img id="processedImage" src="" alt="テンプレート/生成イメージ">
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form id="fileForm" class="form-inline">
+            <input type="file" name="file" id="fileInput" required>
+            <button type="button" onclick="processImage()">テンプレート作成</button>
+        </form>
+        <form id="combinedForm" class="form-inline">
+            <div class="input-group form-inline">
+                <label for="modeSelect">Mode:</label>
+                <select id="modeSelect" name="mode" onchange="toggleCustomInputs()">
+                    <option value="breastup">Breast Up</option>
+                    <option value="waistup">Waist Up</option>
+                    <option value="upperbody">Upperbody</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <div id="customInputs" style="display:none;">
+                    <div class=" form-inline">
+                        <h4>left</h2>
+                        <input type="number" name="left" placeholder="Left" value="155">
+                        <h4>top</h2>
+                        <input type="number" name="top" placeholder="Top" value="55">
+                        <h4>lWidth</h2>
+                        <input type="number" name="width" placeholder="Width" value="200">
+                        <h4>Height</h2>
+                        <input type="number" name="height" placeholder="Height" value="202">
+                    </div>
+                </div>
+            </div>
+            <div class="input-group" style="margin-right: 10px;">
+                <label for="scaleInput">Scale:</label>
+                <input type="number" name="scale" id="scaleInput" value="2" min="1" max="10">
+            </div>
+            <div class="input-group hidden" style="margin-right: 10px;">
+                <label for="fpsInput">FPS:</label>
+                <input type="number" name="fps" id="fpsInput" value="20" min="1" max="60">
+            </div>
+            <button type="button" onclick="generateImage()" class="hidden" id="generateImageButton">Generate Image</button>
+        </form>
+    </div>
+
+    <div class="form-container2 hidden">
+        <form id="expressionForm" class="form-inline">
+            <!-- Eyebrow Type Dropdown -->
+            <div class="input-group2">
+                <label for="eyebrowType">眉の形:</label>
+                <select id="eyebrowType" name="eyebrowType">
+                    <option value="troubled">Troubled</option>
+                    <option value="angry">Angry</option>
+                    <option value="lowered">Lowered</option>
+                    <option value="raised">Raised</option>
+                    <option value="happy" selected>Happy</option>
+                    <option value="serious">Serious</option>
+                </select>
+            </div>
+            <!-- Eye Type Dropdown -->
+            <div class="input-group2">
+                <label for="eyeType">目の形:</label>
+                <select id="eyeType" name="eyeType">
+                    <option value="wink" selected>Wink</option>
+                    <option value="happy_wink">Happy Wink</option>
+                    <option value="surprised">Surprised</option>
+                    <option value="relaxed">Relaxed</option>
+                    <option value="unimpressed">Unimpressed</option>
+                    <option value="raised_lower_eyelid">Raised Lower Eyelid</option>
+                </select>
+            </div>
+            <!-- Mouth Type Dropdown -->
+            <div class="input-group2">
+                <label for="mouthType">口の形:</label>
+                <select id="mouthType" name="mouthType">
+                    <option value="aaa" selected>あ</option>
+                    <option value="iii">い</option>
+                    <option value="uuu">う</option>
+                    <option value="eee">え</option>
+                    <option value="ooo">お</option>
+                    <option value="delta">Delta</option>
+                    <option value="lowered_corner">Lowered Corner</option>
+                    <option value="raised_corner">Raised Corner</option>
+                    <option value="smirk">Smirk</option>
+                </select>
+            </div>
+            <!-- Adjustment Type Radio Buttons -->
+            <div class="input-group2">
+                <label for="adjustmentType">操作部位選択:</label>
+                <select id="adjustmentType" name="adjustmentType">
+                    <option value="eye">目の開木具合</option>
+                    <option value="eyebrow">眉の変形度合い</option>
+                    <option value="iris_small">瞳の大きさSmall</option>
+                    <option value="iris_rotation">瞳の回転</option>
+                    <option value="mouth">口の開き具合</option>
+                    <option value="head_x">頭部分 X</option>
+                    <option value="head_y">頭部分 Y</option>
+                    <option value="neck">首の傾きNeck</option>
+                    <option value="body_y">体の傾き Y</option>
+                    <option value="body_z">体の傾き Z</option>
+                </select>
+            </div>
+            <!-- Adjustment Value Slider -->
+            <div class=" form-inline2">
+                <div class="input-group4">
+                    <label for="useOpenCV">リアルウインドウ</label>
+                    <input type="checkbox" id="useOpenCV" name="useOpenCV_checkbox" onchange="toggleCheckboxValue()">
+                    <input type="hidden" id="useOpenCV_value" name="useOpenCV" value="Off">
+                </div>
+                <div class="input-group6">
+                    <label for="adjustmentValue">選択部位の可動:</label>
+                    <!-- Adjustment Value Slider -->
+                    <input type="range" id="adjustmentValue" name="adjustmentValue" min="-1" max="1" value="0" step="0.05" oninput="updateAdjustment()">
+                    <input type="number" id="adjustmentNumber" name="adjustmentNumber" min="-1" max="1" value="0" step="0.05" oninput="syncSliderWithValue(this.value)">
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="form-container3 hidden">
+        <form  id="expressionIntensityForm" class="form-inline3" ">
+            <!-- 感情のラジオボタン -->
+            <div class="input-group3">
+                <label><input type="radio" name="emotion" value="init">初期化</label>
+                <label><input type="radio" name="emotion" value="happy">喜</label>
+                <label><input type="radio" name="emotion" value="angry">怒</label>
+                <label><input type="radio" name="emotion" value="sorrow">哀</label>
+                <label><input type="radio" name="emotion" value="relaxed">楽</label>
+                <label><input type="radio" name="emotion" value="smile">微笑</label>
+                <label><input type="radio" name="emotion" value="laugh">笑う</label>
+                <label><input type="radio" name="emotion" value="surprised">驚く</label>
+            </div>
+            <!-- 表情選択ドロップダウン -->
+            <div class="form-inline4">
+                <label for="expressionSelect">表情選択:</label>
+                <select  id="expreissionSelect" name="expression">
+                    <option value="smile">喜ぶ</option>
+                    <option value="frown">怒る</option>
+                    <option value="laugh">悲しむ</option>
+                    <option value="laugh">楽しむ</option>
+                    <option value="laugh">微笑む</option>
+                    <option value="laugh">笑う</option>
+                    <option value="laugh">驚く</option>
+                </select>
+            </div>
+            <!-- スライダー -->
+            <div class="input-group5">
+                <label for="expressionIntensity">表情の強さ:</label>
+                <input type="range" id="expressionIntensity" name="intensity" min="0" max="1" value="0.0" step="0.05" oninput="updateIntensityValue(); sendEmotions();">
+                <input type="number" id="intensityValue" value="0" readonly> <!-- 数値表示用 -->
+            </div>
+        </form>
+    </div>
+<!--
+    <div class="form-container4 hidden">
+        <form  id="proseedTestForm" class="form-inline3" ">
+            <div class="input-group3">
+                <label><input type="radio" name="pose" value="test1">連続ポーステスト１</label>
+                <label><input type="radio" name="pose" value="test2">連続ポーステスト２</label>
+                <label><input type="radio" name="pose" value="test3">連続ポーステスト３</label>
+            </div>
+        </form>
+    </div>
+-->
+    <script>
+    // グローバル変数を宣言
+    let globalImgNumber;
+    let useOpenCVValue = "Off";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleCustomInputs();  // ページロード時にカスタム入力の表示状態を設定
+            function toggleCustomInputs() {
+                const selectBox = document.getElementById('modeSelect');
+                const customInputs = document.getElementById('customInputs');
+                customInputs.style.display = selectBox.value === 'custom' ? 'block' : 'none';
+            }
+            document.getElementById('modeSelect').addEventListener('change', toggleCustomInputs);
+            // ファイル入力とボタンクリックのイベントリスナーを追加
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', function() {
+                // ファイルが選択されたときにprocessImage関数を実行
+                processImage();
+            });
+            const processButton = document.querySelector('button[onclick="processImage()"]');
+            processButton.addEventListener('click', function() {
+                // ボタンがクリックされたときにprocessImage関数を実行
+                processImage();
+            });
+        });
+
+        function toggleCustomInputs() {
+            const selectBox = document.getElementById('modeSelect');
+            const customInputs = document.getElementById('customInputs');
+            customInputs.style.display = selectBox.value === 'custom' ? 'block' : 'none';
+        }
+        function processImage() {
+            const form = document.getElementById('fileForm');
+            const formData = new FormData(form);
+            fetch('/process-image/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('originalImage').src = 'data:image/png;base64,' + data.original;
+                document.getElementById('processedImage').src = 'data:image/png;base64,' + data.processed;
+                // img_number をグローバル変数に保存
+                globalImgNumber = data.img_number;
+                console.log("Received img_number:", globalImgNumber); // コンソールにimg_numberを表示
+                // `generateImage` ボタンを表示する
+                document.getElementById('generateImageButton').classList.remove('hidden');
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function generateImage() {
+            const form = document.getElementById('combinedForm');
+            const formData = new FormData(form);
+            // modeがcustomの場合、カスタム値を整数リストとして設定
+            if (document.getElementById('modeSelect').value === 'custom') {
+                const top = parseInt(form.querySelector('input[name="top"]').value, 10);
+                const left = parseInt(form.querySelector('input[name="left"]').value, 10);
+                const width = parseInt(form.querySelector('input[name="width"]').value, 10);
+                const height = parseInt(form.querySelector('input[name="height"]').value, 10);
+                formData.set('mode', JSON.stringify([top, left, width, height]));
+            }
+            fetch('/generate_image/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('processedImage').src = 'data:image/png;base64,' + data.processed;
+                // `form-container2`を表示する
+                document.querySelector('.form-container2').classList.remove('hidden');
+                document.querySelector('.form-container3').classList.remove('hidden');
+                document.querySelector('.form-container4').classList.remove('hidden');
+            })
+            .catch(error => console.error('Error:', error));
+            //Call 2times 切り替わり時対策
+            fetch('/generate_image/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('processedImage').src = 'data:image/png;base64,' + data.processed;
+                // `form-container2`を表示する
+                document.querySelector('.form-container2').classList.remove('hidden');
+                document.querySelector('.form-container3').classList.remove('hidden');
+                document.querySelector('.form-container4').classList.remove('hidden');
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function toggleCheckboxValue() {
+            var checkbox = document.getElementById('useOpenCV');
+            var hiddenInput = document.getElementById('useOpenCV_value');
+            useOpenCVValue = checkbox.checked ? "On" : "Off";
+            if (checkbox.checked) {
+                hiddenInput.value = "On";
+            } else {
+                hiddenInput.value = "Off";
+            }
+            console.log("useOpenCV value set to: " + hiddenInput.value); // 現在の値をコンソールに表示
+        }
+        function updateIntensityValue() {
+            var slider = document.getElementById('expressionIntensity');
+            var output = document.getElementById('intensityValue');
+            output.value = slider.value; // スライダーの値を表示用のボックスに設定
+        }
+  
+        function updateAdjustment() {
+            //const form = document.getElementById('expressionForm');
+            const combinedFormData = new FormData(document.getElementById('combinedForm'));
+            const expressionFormData = new FormData(document.getElementById('expressionForm'));
+            const slider = document.getElementById('adjustmentValue');
+            const numberInput = document.getElementById('adjustmentNumber');
+            numberInput.value = slider.value;  // スライダーの値を数値ボックスに反映
+            slider.value = numberInput.value;  // 数値ボックスの値をスライダーに反映
+            const data = {
+                eyebrow_type: expressionFormData.get('eyebrowType'),
+                eye_type: expressionFormData.get('eyeType'),
+                mouth_type: expressionFormData.get('mouthType'),
+                adjustment_type: expressionFormData.get('adjustmentType'),
+                adjustment_value: parseFloat(expressionFormData.get('adjustmentValue')), // 数値に変換
+                scale: combinedFormData.get('scale'),
+                fps: combinedFormData.get('fps'),
+                useOpenCV:expressionFormData.get('useOpenCV'),
+            };
+            console.log(data)
+            fetch('/update_adjustment/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();  // ストリーミングされたデータをblobとして取得
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);  // BlobからURLを生成
+                document.getElementById('processedImage').src = url;  // 画像タグのsrc属性にURLを設定
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function syncSliderWithValue(value) {
+            const slider = document.getElementById('adjustmentValue');
+            slider.value = value;  // 数値ボックスの値をスライダーに反映
+        }
+        
+        function sendEmotions() {
+            const formData = new FormData(document.getElementById('combinedForm'));
+            const expressionFormData = new FormData(document.getElementById('expressionForm'));
+            // ラジオボタンから選択された感情を取得
+            const emotionInput = document.querySelector('input[name="emotion"]:checked');
+            const selectedEmotion = emotionInput ? emotionInput.value : '';  // 選択されていない場合は空文字を設定
+            // 感情データを文字列として追加
+            formData.append('emotions', selectedEmotion);
+            formData.append('useOpenCV', expressionFormData.get('useOpenCV'));
+            // 表情の強さスライダーの値を追加
+            const intensity = document.getElementById('expressionIntensity').value;
+            formData.append('intensity', intensity);
+            fetch('/process-emotions/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();  // ストリーミングされたデータをblobとして取得
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);  // BlobからURLを生成
+                document.getElementById('processedImage').src = url;  // 画像タグのsrc属性にURLを設定
+            })           
+            .catch(error => console.error('Error:', error));
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            const radioButtons = document.querySelectorAll('input[name="pose"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        const test = this.value;  // ラジオボタンの選択された値
+                        const mode = document.getElementById('modeSelect').value;
+                        const scale = document.getElementById('scaleInput').value;
+                        const fps = document.getElementById('fpsInput').value;
+
+                        // FormDataを用いてフォームデータを準備
+                        const formData = new FormData();
+                        formData.append('test', test);  // 'test'という名前で選択された値を追加
+                        formData.append('mode', mode);
+                        formData.append('scale', scale);
+                        formData.append('fps', fps);
+
+                        console.log("formData:", formData); // コンソールにimg_numberを表示
+                        // Fetch APIを使用してPOSTリクエストを送信
+                        fetch('/auto-process/', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Success:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('input[name="emotion"]').forEach((checkbox) => {
+            checkbox.addEventListener('change', sendEmotions);
+        });
+
+        document.getElementById('fileInput').onchange = (event) => {
+            const [file] = event.target.files;
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('originalImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    </script>
+</body>
+</html>
+

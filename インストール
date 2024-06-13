@@ -1,0 +1,36 @@
+********** CUDA確認
+nvcc -V
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Wed_Nov_22_10:17:15_PST_2023
+Cuda compilation tools, release 12.3, V12.3.107
+Build cuda_12.3.r12.3/compiler.33567101_0
+
+********** リポジトリのクローン
+git clone https://github.com/pkhungurn/talking-head-anime-3-demo.git
+
+********** 仮想環境の作成とインストール
+python3 -m venv tkh
+source tkh/bin/activate
+cd Scalable-talking-head-anime-v1
+pip install requirements.txt
+
+********** ウエイトのダウンロード
+Talking-Head-Anime3
+wget https://www.dropbox.com/s/y7b8jl4n2euv8xe/talking-head-anime-3-models.zip?dl=0
+
+またはHuggingFace
+https://huggingface.co/UZUKI/Scalable-tkh
+からダウンロード
+
+dataフォルダにtalking-head-anime-3-models.zip?dl=0をコピーし、そこで展開
+作成されたホルダー名をmodelsに変更
+
+その他もHuggingFaceからダウンロード
+ssd_best8.pthをweightsホルダへコピー
+realesr-animevideov3.pthをweightsホルダへコピー
+isnetis.ckptはtalking-head-anime-3-v1-apiのTOPへコピー
+
+
+
+
