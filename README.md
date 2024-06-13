@@ -1,239 +1,118 @@
-# Demo Code for "Talking Head(?) Anime from A Single Image 3: Now the Body Too"
+# Scalable TalkingHead-Anime-V1
 
-This repository contains demo programs for the [Talking Head(?) Anime from a Single Image 3: Now the Body Too](https://pkhungurn.github.io/talking-head-anime-3/index.html) project. As the name implies, the project allows you to animate anime characters, and you only need a single image of that character to do so. There are two demo programs:
+オリジナルのhttps://github.com/pkhungurn/talking-head-anime-3-demo をベースに
 
-* The ``manual_poser`` lets you manipulate a character's facial expression, head rotation, body rotation, and chest expansion due to breathing through a graphical user interface. 
-* ``ifacialmocap_puppeteer`` lets you transfer your facial motion to an anime character.
+APIサーバ機能
 
-## Try the Manual Poser on Google Colab
+任意サイズの切り出しとアップスケール機能
 
-If you do not have the required hardware (discussed below) or do not want to download the code and set up an environment to run it, click [![this link](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pkhungurn/talking-head-anime-3-demo/blob/master/colab.ipynb) to try running the manual poser on [Google Colab](https://research.google.com/colaboratory/faq.html).
+テンプレート自動作成機能
 
-## Hardware Requirements
+高度な抽象化されたポーズデータの指定
 
-Both programs require a recent and powerful Nvidia GPU to run. I could personally ran them at good speed with the Nvidia Titan RTX. However, I think recent high-end gaming GPUs such as the RTX 2080, the RTX 3080, or better would do just as well.
+などの機能を追加し、サーバまたはクラスライブラリとして利用できるようにしました。
+また、クライアント側では並列列処理機能を利用して処理時間を要するポースデータの生成とアップスケールをpipeline処理しています。更に自動瞬き機能やポーズゲネレーション機能も並列処理されてアプリからの操作を最小限にすることができます。
 
-The `ifacialmocap_puppeteer` requires an iOS device that is capable of computing [blend shape parameters](https://developer.apple.com/documentation/arkit/arfaceanchor/2928251-blendshapes) from a video feed. This means that the device must be able to run iOS 11.0 or higher and must have a TrueDepth front-facing camera. (See [this page](https://developer.apple.com/documentation/arkit/content_anchors/tracking_and_visualizing_faces) for more info.) In other words, if you have the iPhone X or something better, you should be all set. Personally, I have used an iPhone 12 mini.
+## Scalable-Tanking-Head-Anime-3-API との違い
 
-## Software Requirements
+Scalable-Tanking-Head-Anime-3-APIはアップスケーラやAnimeFaceDetection,背景削除を独立したサーバで動かしています。とても面倒でした。またテストはテストプログラムで動きを確認するだけでした。Scalable TalkingHead-Anime-V1で独立して動いていた各AIサーバをメインサーバ機能のsubprocessとして実行・停止を行いため、サーバ起動は一つのPythonファイルの実行でずべて動くように大きく改良してイます。またテスト用のGUIも準備しました。Scalable-Tanking-Head-Anime-3-API で使えたテストプログラムはすべて動きます。またクラスライブラリに変更は無いので過去のバージョンと互換です。GUIコードではクラスライブラリの使い方がわかるように簡略化を避けました。
 
-### GPU Related Software
+## 詳細な使い方について
 
-Please update your GPU's device driver and install the [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) that is compatible with your GPU and is newer than the version you will be installing in the next subsection.
+使い方が多岐に渡るため、めぐチャンネルにて順次記事にします。技術書典でご購入いただいた第2部の補完及び機能アップの説明になります。
 
-### Python Environment
+## 確認済み動作環境
+Ubuntu22.04 / 20.04
 
-Both ``manual_poser`` and ``ifacialmocap_puppeteer`` are available as desktop applications. To run them, you need to set up an environment for running programs written in the [Python](http://www.python.org) language. The environment needs to have the following software packages:
+CPUはそれなりに処理能力を要します。マルチプロセッシングや複数のFastAPIサーバを動かすため、コア数の多いi5以上を推奨します。
 
-* Python >= 3.8
-* PyTorch >= 1.11.0 with CUDA support
-* SciPY >= 1.7.3
-* wxPython >= 4.1.1
-* Matplotlib >= 3.5.1
+GPUは必須です。　x4以上のアップスケールを行うためにはRTX3060以上が必要です。x1で使う場合は1650程度でも動きます。VRAM容量は2G以上ですが、扱うキャラクタ画像（最大20）が増えるとVRAMを使うため概ね4G程度を目処にしてください。
 
-One way to do so is to install [Anaconda](https://www.anaconda.com/) and run the following commands in your shell:
 
-```
-> conda create -n talking-head-anime-3-demo python=3.8
-> conda activate talking-head-anime-3-demo
-> conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-> conda install scipy
-> pip install wxpython
-> conda install matplotlib
-```
+## インストール
 
-#### Caveat 1: Do not use Python 3.10 on Windows
+インストール.txtに記載しています。特にCUDAのインストールについては記述ありませんが、12.3で動作確認をしています。仮想環境を作成するので事前にvenv環境が作成出来る準備が必要です。
 
-As of June 2006, you cannot use [wxPython](https://www.wxpython.org/) with Python 3.10 on Windows. As a result, do not use Python 3.10 until [this bug](https://github.com/wxWidgets/Phoenix/issues/2024) is fixed. This means you should not set ``python=3.10`` in the first ``conda`` command in the listing above.
+### CUDAの確認
+nvcc -V　　このコマンドにて以下のようなバージョン情報が表示されればOKです。
 
-#### Caveat 2: Adjust versions of Python and CUDA Toolkit as needed
+nvcc: NVIDIA (R) Cuda compiler driver
 
-The environment created by the commands above gives you Python version 3.8 and an installation of [PyTorch](http://pytorch.org) that was compiled with CUDA Toolkit version 11.3. This particular setup might not work in the future because you may find that this particular PyTorch package does not work with your new computer. The solution is to:
+Copyright (c) 2005-2023 NVIDIA Corporation
 
-1. Change the Python version in the first command to a recent one that works for your OS. (That is, do not use 3.10 if you are using Windows.)
-2. Change the version of CUDA toolkit in the third command to one that the PyTorch's website says is available. In particular, scroll to the "Install PyTorch" section and use the chooser there to pick the right command for your computer. Use that command to install PyTorch instead of the third command above.
+Built on Wed_Nov_22_10:17:15_PST_2023
 
-![The command to install PyTorch](docs/pytorch-install-command.png "The command to install PyTorch")
+Cuda compilation tools, release 12.3, V12.3.107
 
-### Jupyter Environment
+Build cuda_12.3.r12.3/compiler.33567101_0
 
-The ``manual_poser`` is also available as a [Jupyter Nootbook](http://jupyter.org). To run it on your local machines, you also need to install:
 
-* Jupyter Notebook >= 7.3.4
-* IPywidgets >= 7.7.0
+### リポジトリのクローン
 
-In some case, you will also need to enable the ``widgetsnbextension`` as well. So, run
+git clone git@github.com:animede/Scalable-Tanking-Head-Anime-3-API.git
 
-```
-> jupyter nbextension enable --py widgetsnbextension
-```
+### 仮想環境の作成とインストール
+python3 -m venv tkh
 
-After installing the above two packages. Using Anaconda, I managed to do the above with the following commands:
+source tkh/bin/activate
 
-```
-> conda install -c conda-forge notebook
-> conda install -c conda-forge ipywidgets
-> jupyter nbextension enable --py widgetsnbextension
-```
+cd Scalable-talking-head-anime-v1
 
-### Automatic Environment Construction with Anaconda
+pip install requirements.txt
 
-You can also use Anaconda to download and install all Python packages in one command. Open your shell, change the directory to where you clone the repository, and run:
+### ウエイトのダウンロード
+#### Talking-Head-Anime3
 
-```
-> conda env create -f environment.yml
-```
+wget https://www.dropbox.com/s/y7b8jl4n2euv8xe/talking-head-anime-3-models.zip?dl=0
 
-This will create an environment called ``talking-head-anime-3-demo`` containing all the required Python packages.
+または
+HuggingFace
+https://huggingface.co/UZUKI/Scalable-tkh
+からダウンロード
 
-### iFacialMocap
+dataフォルダにtalking-head-anime-3-models.zip?dl=0をコピーし、そこで展開
+作成されたホルダー名をmodelsに変更
 
-If you want to use ``ifacialmocap_puppeteer``, you will also need to an iOS software called [iFacialMocap](https://www.ifacialmocap.com/) (a 980 yen purchase in the App Store). You do not need to download the paired application this time. Your iOS and your computer must use the same network. For example, you may connect them to the same wireless router.
+#### その他もHuggingFaceからダウンロード
+ssd_best8.pthをweightsホルダへコピー
 
-## Download the Models
+realesr-animevideov3.pthをweightsホルダへコピー
 
-Before running the programs, you need to download the model files from this [Dropbox link](https://www.dropbox.com/s/y7b8jl4n2euv8xe/talking-head-anime-3-models.zip?dl=0) and unzip it to the ``data/models`` folder under the repository's root directory. In the end, the data folder should look like:
+isnetis.ckptはtalking-head-anime-3-v1-apiのTOPへコピー
 
-```
-+ data
-  + images
-    - crypko_00.png
-    - crypko_01.png
-        :
-    - crypko_07.png
-    - lambda_00.png
-    - lambda_01.png
-  + models
-    + separable_float
-      - editor.pt
-      - eyebrow_decomposer.pt
-      - eyebrow_morphing_combiner.pt
-      - face_morpher.pt
-      - two_algo_face_body_rotator.pt
-    + separable_half
-      - editor.pt
-          :
-      - two_algo_face_body_rotator.pt
-    + standard_float
-      - editor.pt
-          :
-      - two_algo_face_body_rotator.pt
-    + standard_half
-      - editor.pt
-          :
-      - two_algo_face_body_rotator.pt
-```
+### Webアプリの動かし方
+thh_全機能の動かし方に記載しています。
 
-The model files are distributed with the 
-[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode), which
-means that you can use them for commercial purposes. However, if you distribute them, you must, among other things, say 
-that I am the creator.
+#### Scalable TalkingHeadAnime-V1サーバの起動
+ターミナルを開いて以下のコマンドを実行
 
-## Running the `manual_poser` Desktop Application
+source tkh/bin/activate
 
-Open a shell. Change your working directory to the repository's root directory. Then, run:
+cd Scalable-talking-head-anime-v1
 
-```
-> python tha3/app/manual_poser.py
-```
+python poser_api_v1_3S_server.py
 
-Note that before running the command above, you might have to activate the Python environment that contains the required
-packages. If you created an environment using Anaconda as was discussed above, you need to run
+#### Webサーバの起動
+ターミナルを開いて以下のコマンドを実行
 
-```
-> conda activate talking-head-anime-3-demo
-```
+source tkh/bin/activate
 
-if you have not already activated the environment.
+cd Scalable-talking-head-anime-v1
 
-### Choosing System Variant to Use
+python tkh_gui_html.py
 
-As noted in the [project's write-up](http://pkhungurn.github.io/talking-head-anime-3/index.html), I created 4 variants of the neural network system. They are called ``standard_float``, ``separable_float``, ``standard_half``, and ``separable_half``. All of them have the same functionalities, but they differ in their sizes, RAM usage, speed, and accuracy. You can specify which variant that the ``manual_poser`` program uses through the ``--model`` command line option.
+host="0.0.0.0", port=3001で起動するので、ブラウザーから127.0.0.1:3001にアクセスします。
 
-```
-> python tha3/app/manual_poser --model <variant_name>
-```
+ネットワーク上の他のPCからもアクセスできますいが、複数クライアントへの正常なサービスができません。
 
-where ``<variant_name>`` must be one of the 4 names above. If no variant is specified, the ``standard_float`` variant (which is the largest, slowest, and most accurate) will be used.
+URLとポートはtkh_gui_html.pyの最後の行で変更可能です。
 
-## Running the `manual_poser` Jupyter Notebook
+#### 基本的な使い方
+ブラウザでアクセスするとファイル選択ボックスが表示されるのでクリックして使いたい画像をファイルを選択してください。選択後は自動的にテンプレートまで作成します。キャラクタが任意の位置に一人だけいる使える画像であればほとんど利用できます。背景があっても、背景が透過であっても問題ありません。
 
-Open a shell. Activate the environment. Change your working directory to the repository's root directory. Then, run:
 
-```
-> jupyter notebook
-```
+テンプレート画像が表示されたら、Generate Imageボタンが表示されます。クリックするとmodeに従った生成画像が表示されます。黒い画面になる場合はもう一度Generate Imageボタンをクリックしてください。生成画像が表示されるとともに、下に操作パネルが表示されます。
 
-A browser window should open. In it, open `manual_poser.ipynb`. Once you have done so, you should see that it has two cells. Run the two cells in order. Then, scroll down to the end of the document, and you'll see the GUI there.
+キャラクタを変えるには再度ファイル選択からやり直してください。
 
-You can choose the system variant to use by changing the ``MODEL_NAME`` variable in the first cell. If you do, you will need to rerun both cells in order for the variant to be loaded and the GUI to be properly updated to use it.
 
-## Running the `ifacialmocap_poser`
-
-First, run iFacialMocap on your iOS device. It should show you the device's IP address. Jot it down. Keep the app open.
-
-![IP address in iFacialMocap screen](docs/ifacialmocap_ip.jpg "IP address in iFacialMocap screen")
-
-Open a shell. Activate the Python environment. Change your working directory to the repository's root directory. Then, run:
-
-```
-> python tha3/app/ifacialmocap_puppeteer.py
-```
-
-You will see a text box with label "Capture Device IP." Write the iOS device's IP address that you jotted down there.
-
-![Write IP address of your iOS device in the 'Capture Device IP' text box.](docs/ifacialmocap_puppeteer_ip_address_box.png "Write IP address of your iOS device in the 'Capture Device IP' text box.")
-
-Click the "START CAPTURE!" button to the right.
-
-![Click the 'START CAPTURE!' button.](docs/ifacialmocap_puppeteer_click_start_capture.png "Click the 'START CAPTURE!' button.")
-
-If the programs are connected properly, you should see the numbers in the bottom part of the window change when you move your head.
-
-![The numbers in the bottom part of the window should change when you move your head.](docs/ifacialmocap_puppeteer_numbers.png "The numbers in the bottom part of the window should change when you move your head.")
-
-Now, you can load an image of a character, and it should follow your facial movement.
-
-## Contraints on Input Images
-
-In order for the system to work well, the input image must obey the following constraints:
-
-* It should be of resolution 512 x 512. (If the demo programs receives an input image of any other size, they will resize the image to this resolution and also output at this resolution.)
-* It must have an alpha channel.
-* It must contain only one humanoid character.
-* The character should be standing upright and facing forward.
-* The character's hands should be below and far from the head.
-* The head of the character should roughly be contained in the 128 x 128 box in the middle of the top half of the image.
-* The alpha channels of all pixels that do not belong to the character (i.e., background pixels) must be 0.
-
-![An example of an image that conforms to the above criteria](docs/input_spec.png "An example of an image that conforms to the above criteria")
-
-See the project's [write-up](http://pkhungurn.github.io/talking-head-anime-3/full.html#sec:problem-spec) for more details on the input image.
-
-## Citation
-
-If your academic work benefits from the code in this repository, please cite the project's web page as follows:
-
-> Pramook Khungurn. **Talking Head(?) Anime from a Single Image 3: Now the Body Too.** http://pkhungurn.github.io/talking-head-anime-3/, 2022. Accessed: YYYY-MM-DD.
-
-You can also used the following BibTex entry:
-
-```
-@misc{Khungurn:2022,
-    author = {Pramook Khungurn},
-    title = {Talking Head(?) Anime from a Single Image 3: Now the Body Too},
-    howpublished = {\url{http://pkhungurn.github.io/talking-head-anime-3/}},
-    year = 2022,
-    note = {Accessed: YYYY-MM-DD},
-}
-```
-
-## Disclaimer
-
-While the author is an employee of [Google Japan](https://careers.google.com/locations/tokyo/), this software is not Google's product and is not supported by Google.
-
-The copyright of this software belongs to me as I have requested it using the [IARC process](https://opensource.google/documentation/reference/releasing#iarc). However, Google might claim the rights to the intellectual
-property of this invention.
-
-The code is released under the [MIT license](https://github.com/pkhungurn/talking-head-anime-2-demo/blob/master/LICENSE).
-The model is released under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode). Please see the README.md file in the ``data/images`` directory for the licenses for the images there.
