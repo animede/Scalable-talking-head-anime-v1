@@ -1,0 +1,15 @@
+********** ウエイトのダウンロード
+Talking-Head-Anime3
+wget https://www.dropbox.com/s/y7b8jl4n2euv8xe/talking-head-anime-3-models.zip?dl=0
+
+またはHuggingFace
+https://huggingface.co/UZUKI/Scalable-tkh
+からダウンロード
+
+dataにtalking-head-anime-3-models.zip?dl=0をコピーし、そこで展開
+作成されたホルダー名をmodelsに変更
+
+
+
+
+
