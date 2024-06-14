@@ -85,9 +85,11 @@ source tkh/bin/activate
 
 cd Scalable-talking-head-anime-v1
 
-pip install requirements.txt
+pip install -r requirements.txt
 
 PyToechは　2.3.1+Linux＋pip＋CUDA12.1　でインストール
+
+pip install requirements.txtでインストールエラーになる場合はエラーメッセージに従い個別にモジュールのインストールを行ってください
 
 ### ウエイトのダウンロード
 #### Talking-Head-Anime3
@@ -138,7 +140,7 @@ URLとポートはtkh_gui_html.pyの最後の行で変更可能です。
 
 
 ### Windows環境について
-Windowsにインストールするにはいくつか変更などがあります。現在調査中ですが、
+Windowsにインストールするにはいくつか変更などがあります。調査中ですが、以下は現時点ではっきりしている必要な変更です。
 
 source tkh/bin/activate　→　.\tkh\Script\activate
 
