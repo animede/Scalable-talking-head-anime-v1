@@ -91,6 +91,10 @@ PyToechは　2.3.1+Linux＋pip＋CUDA12.1　でインストール
 
 pip install requirements.txtでインストールエラーになる場合はエラーメッセージに従い個別にモジュールのインストールを行ってください
 
+pytorch　2.3.2のインストール（CUDA環境に合わせて）
+
+cv2,matplotlib,fastapi、pytorch_lightning,scipyが不足している可能性があります。
+
 ### ウエイトのダウンロード
 #### Talking-Head-Anime3
 
@@ -142,11 +146,15 @@ URLとポートはtkh_gui_html.pyの最後の行で変更可能です。
 ### Windows環境について
 Windowsにインストールするにはいくつか変更などがあります。調査中ですが、以下は現時点ではっきりしている必要な変更です。
 
-source tkh/bin/activate　→　.\tkh\Script\activate
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+
+source tkh/bin/activate　→　.\tkh\Scripts\activate
 
 URL　0.0.0.0だとエラーになるので127.0.0.1へ変更
 
 UTF-8指定
+
+ここまでで　Scalable TalkingHeadAnime-V1サーバ　は動きます。　Webサーバの起動についてはLinuxとWindowsのマルチプロセッシング処理方法が違うので、さらに修正が必要です（検討中）
 
 ### 基本的な使い方
 ブラウザでアクセスするとファイル選択ボックスが表示されるのでクリックして使いたい画像をファイルを選択してください。選択後は自動的にテンプレートまで作成します。キャラクタが任意の位置に一人だけいる使える画像であればほとんど利用できます。キャラクタが小さくても、顔の部分のみであっても、背景濃霧や透過に関係なく使えます。
